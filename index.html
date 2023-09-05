@@ -1,0 +1,377 @@
+<div class="main-content">
+    <div class="container-fluid project_module">
+        <div class="row" >
+            <div class="col ">
+                <div class="row Page-title">
+                    <h3 class="col-md-12 col-lg-12 col-xl-4 mb-0">Basic Details</h3>
+                </div>
+                <div class="card border-0 project_card project_details">
+                    <div class="card-body form-body">
+                        
+                        <div class="col-lg-12 new-project-detail d-flex justify-content-between align-items-start">
+                            <div class="col-xl-2 col-lg-2 col-6">
+                              <h6>Last Status Time</h6>
+                              <span>{{records?.updatedAt | date:dateTimeFormat || emptyValue }}</span>
+                            </div>
+                            <div class="col-xl-2 col-lg-2 col-6">
+                              <h6>Portal</h6>
+                              <span>{{records?.bidDetails?.portalDetails?.name || emptyValue}}</span>
+                            </div>
+                            <div class="col-xl-2 col-lg-2 col-6">
+                              <h6>Account Used</h6>
+                              <span>{{records?.bidDetails?.upworkIdDetails?.name || emptyValue}}</span>
+                            </div>
+                            <div class="col-xl-2 col-lg-2 col-6">
+                                <h6>Status</h6>
+                                <span>Status</span>
+                              </div>
+                              <div class="col-xl-2 col-lg-2 col-6">
+                                <h6>Booked By</h6>
+                                <span>{{records?.bidDetails?.bookedByDetails?.name || emptyValue}}</span>
+                              </div>
+                              <div class="col-xl-2 col-lg-2 col-6" >
+                                <h6>Done By</h6>
+                                <span>Done By</span>
+                              </div>
+                              <div class="col-xl-2 col-lg-2 col-6" >
+                                <h6>Job Title</h6>
+                                <span>{{records?.bidDetails?.jobTitle? (records?.bidDetails?.jobTitle | titlecase ) : emptyValue }}</span>
+                              </div>
+                              <div class="col-xl-2 col-lg-2 col-6" >
+                                <h6>Job Type</h6>
+                                <span>{{records?.bidDetails?.jobType==1?'Hourly':'Fixed'}}</span>
+                              </div>
+                              <div class="col-xl-2 col-lg-2 col-6" >
+                                <h6>Domain</h6>
+                                <span>Domain</span>
+                              </div>
+                            <div class="col-xl-2 col-lg-2 col-6" >
+                              <h6>Url</h6>
+                              <span><a [href]="records?.bidDetails?.jobUrl || emptyValue">{{records?.bidDetails?.jobUrl || emptyValue | truncate :[20]}}</a></span>
+                            </div>
+                            
+                            <div class=" col-lg-12" >
+                              <h6>Description</h6>
+                              <span>{{records?.bidDetails?.description || emptyValue}}</span>
+                            </div>
+                            <div class=" col-lg-12 " >
+                              <h6>Documents</h6>
+                              <div class="document-container" *ngIf="records?.bidDetails?.uploadDoc.length>0 || records?.documents.length>0;else otherBlock">
+                              <ng-container *ngFor="let document of getAllDocs(records?.bidDetails?.uploadDoc,records?.documents); let index=i">
+                                <a [href]="download(document)" target="_b" >
+                                <div class="document-btn">
+                                  <button class="document-button">
+                                  <i class="fas fa-file-alt"></i> <!-- Font Awesome document icon -->
+                                  <span>{{ document?.fileName|trucateText }}</span>
+                                </button>
+                              </div>
+                            </a>
+                            </ng-container>
+                        
+                          </div>
+                          <ng-template #otherBlock>
+                            {{emptyValue}}
+                          </ng-template>
+                            </div>
+                          </div>
+
+                    </div>
+                </div>
+                <div class="card border-0 project_card project_details">
+                  <div class="card-body form-body">
+                      
+                    <h4>Estimate/Query</h4>
+                      <div class="col-lg-12 new-project-detail d-flex justify-content-between align-items-start">
+                        <div class="left_colm mt-md-0 mt-3 d-flex align-item-center justify-content-start flex-wrap">
+                          <button class="btn btn-md" [ngClass]="displayColor?'estimate':'query'" (click)="estimateType(1)">Estimates</button>
+                        <button class="btn btn-md" [ngClass]="displayColor?'query':'estimate'" (click)="estimateType(2)">Query</button>
+                        </div> 
+                        <ng-container *ngIf="displayColor;else chatPage">
+                          <div class="estimate_table" >
+                            <form [formGroup]="employeeEstimateForm">
+                          <table class="table table-bordered" *ngIf="getFormArrayControls('estimateForm').length>0">
+                            <thead>
+                              <tr>
+                                <ng-container *ngFor="let heading of header">
+                                  <th>{{ heading.Name }}</th>
+                                </ng-container>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <ng-container formArrayName="estimateForm">
+                                <ng-container *ngFor="let estimateTeam of getFormArrayControls('estimateForm'); let index = index" [formGroupName]="index">
+                                  <tr>
+                                    <ng-container *ngIf="isCellBeingEdited(index,-1)">
+                                      <td [attr.rowspan]="getRowSpan(getFormArrayControls('estimateForm'), index)">{{estimateTeam?.taskName}}</td>
+                                    </ng-container>
+                                    <ng-container *ngIf="!isCellBeingEdited(index,-1)">
+                                      <td [attr.rowspan]="getRowSpan(getFormArrayControls('estimateForm'), index)">
+                                        <div class="input_field">
+                                          <app-basic-dropdown
+                                            [class]="[classValue.COL.LG_6, classValue.COL.XL_3]"
+                                            class="Select Name" [getClass]="true"
+                                            [placeholder]="'Select Task'"
+                                            [firstNameControl]="estimateTeam.get('taskName')"
+                                            [leaveDropdown]="taskNameArray"
+                                            [submitted]="submitted">
+                                          </app-basic-dropdown>
+                                        </div>
+                                      </td>
+                                    </ng-container>
+                                    <ng-container formArrayName="taskDetails">
+                                      <ng-container *ngFor="let taskDetails of getNestedFormArrayControls('taskDetails', index).slice(0,1); let taskDetailIndex=index" [formGroupName]="taskDetailIndex">
+                                      <ng-container *ngIf="isCellBeingEdited(index,MINUS_ONE)">
+                                        <td (dblclick)="setEditIndexForCell(index,MINUS_ONE)">{{taskDetails?.get('team').value}}</td>
+                                        <td (dblclick)="setEditIndexForCell(index,MINUS_ONE)">{{taskDetails?.get('givenBy').value}}</td>
+                                        <td (dblclick)="setEditIndexForCell(index,MINUS_ONE)">{{taskDetails?.get('hours').value}}</td>
+                                        <td (dblclick)="setEditIndexForCell(index,MINUS_ONE)">
+                                          <a [href]="taskDetails?.get('link').value" target="_blank"> 
+                                            <span>
+                                              {{taskDetails?.get('link').value | truncate:[20]}}
+                                            </span>
+                                          </a>
+                                        </td>
+                                        <td (dblclick)="setEditIndexForCell(index,MINUS_ONE)">{{taskDetails?.get('info').value || emptyValue}}</td>
+                                      </ng-container>
+                                      <ng-container *ngIf="!isCellBeingEdited(index,MINUS_ONE)">
+                                        <td>
+                                          <div class="input_field">
+                                            <app-basic-dropdown
+                                              [class]="[classValue.COL.LG_6, classValue.COL.XL_3]"
+                                              class="Select Name" [getClass]="true"
+                                              [placeholder]="'Select Team'"
+                                              [firstNameControl]="taskDetails.get('team')"
+                                              [leaveDropdown]="teamArray"
+                                              [submitted]="submitted">
+                                            </app-basic-dropdown>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                          <app-basic-dropdown
+                                            [class]="[classValue.COL.LG_6, classValue.COL.XL_3]"
+                                            class="Select Name" [getClass]="true"
+                                            [placeholder]="'Select Name'"
+                                            [firstNameControl]="taskDetails.get('givenBy')"
+                                            [leaveDropdown]="givenByArray"
+                                            [submitted]="submitted">
+                                          </app-basic-dropdown>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                            <input id="pmEstimatedTime" 
+                                              type="text" class="form-control form-control-light"
+                                              formControlName="hours" placeholder="HH:MM" formatHM maxHours="999999"/>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                            <app-input-field appInputRestriction [class]="[classValue.COL.LG_6,classValue.COL.XL_3]"
+                                              [placeHolder]="'Enter Link'" [formFieldLight]="true"
+                                              [firstNameControl]="taskDetails.get('link')" 
+                                              [submitted]="submitted">
+                                          </app-input-field>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                            <app-input-field appInputRestriction [class]="[classValue.COL.LG_6,classValue.COL.XL_3]"
+                                              [placeHolder]="'Type Info'" [formFieldLight]="true"
+                                              [firstNameControl]="taskDetails.get('info')" 
+                                              [submitted]="submitted">
+                                            </app-input-field>
+                                          </div>
+                                        </td>
+                                      </ng-container>
+                                      </ng-container>
+                                  </ng-container>
+                                    <td>
+                                      <div class="button-container">
+                                        <div class="action_icon">
+                                          <ng-container *ngIf="getRowSpan(getFormArrayControls('estimateForm'), index)<=1"> 
+                                            <button class="edit_icon" title="Add More" (click)="addMoreTaskDetails(getFormArrayControls('estimateForm'), index)">
+                                              <span class="icon"><i class="fa fa-plus"></i></span>
+                                            </button>
+                                          </ng-container>
+                                          <ng-container *ngIf="getRowSpan(getFormArrayControls('estimateForm'), index)>1">
+                                            <button class="minus-icon" title="Remove " (click)="removeTaskDetails(index,ZERO)">
+                                              <span class="icon"><i class="fa fa-minus"></i></span>
+                                            </button>
+                                          </ng-container>
+                                          <ng-container *ngIf="getRowSpan(getFormArrayControls('estimateForm'), index)==1">
+                                            <button class="delete_icon" title="Delete Task" (click)="[removeTask(index),clearEditIndexForCell(index,-1)]">
+                                              <span class="icon"><i class="fa fa-trash"></i></span>
+                                            </button>
+                                          </ng-container>
+                                          <ng-container *ngIf="!isCellBeingEdited(index,MINUS_ONE)">
+                                            <button class="save_icon" title="save Task" (click)="[setSaveIndexForCell(index,MINUS_ONE),onSubmitForm()]">
+                                              <span class="icon">Save</span>
+                                            </button>
+                                          </ng-container>
+                                        </div>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                  <ng-container formArrayName="taskDetails">
+                                    <tr *ngFor="let taskDetails of getNestedFormArrayControls('taskDetails', index).slice(1);let taskDetailIndex=index;" [formGroupName]="taskDetailIndex+1" >
+                                      <ng-container *ngIf="isCellBeingEdited(index,taskDetailIndex)" >
+                                      
+                                          <td (dblclick)="setEditIndexForCell(index,taskDetailIndex)">{{taskDetails?.get('team').value}}</td>
+                                          <td (dblclick)="setEditIndexForCell(index,taskDetailIndex)">{{taskDetails?.get('givenBy').value}}</td>
+                                          <td (dblclick)="setEditIndexForCell(index,taskDetailIndex)">{{taskDetails?.get('hours').value}}</td>
+                                          <td (dblclick)="setEditIndexForCell(index,taskDetailIndex)">
+                                            <a [href]="taskDetails?.get('link').value" target="_blank"> 
+                                              <span>
+                                                {{taskDetails?.get('link').value | truncate:[20]}}
+                                              </span>
+                                            </a>
+                                          </td>
+                                          <td (dblclick)="setEditIndexForCell(index,taskDetailIndex)">{{taskDetails?.get('info').value || emptyValue}}</td>
+                                        
+                                        <td>
+                                          <div class="button-container">
+                                            <div class="action_icon">
+                                              <ng-container *ngIf="taskDetailIndex==getNestedFormArrayControls('taskDetails', index).length-2">
+                                                <button class="edit_icon" title="Add More" (click)="addMoreTaskDetails(getFormArrayControls('estimateForm'), index)">
+                                                  <span class="icon"><i class="fa fa-plus"></i></span>
+                                                </button>
+                                              </ng-container>
+                                              <ng-container *ngIf="getRowSpan(getFormArrayControls('estimateForm'), index)>1 && getRowSpan(getFormArrayControls('estimateForm'), index)!=getNestedFormArrayControls('taskDetails', index).length-1">
+                                                <button class="minus-icon" title="Remove Task" (click)="[removeTaskDetails(index,taskDetailIndex),clearEditIndexForCell(index,taskDetailIndex)]">
+                                                  <span class="icon"><i class="fa fa-minus"></i></span>
+                                                </button>
+                                            </ng-container>
+                                            </div>
+                                          </div>
+                                        </td>
+                                      </ng-container>
+                                      <!-- Editing For Form -->
+                                      <ng-container *ngIf="!isCellBeingEdited(index,taskDetailIndex)">
+                                        <td>
+                                          <div class="input_field">
+                                            <app-basic-dropdown
+                                              [class]="[classValue.COL.LG_6, classValue.COL.XL_3]"
+                                              class="Select Name" [getClass]="true"
+                                              [placeholder]="'Select Team'"
+                                              [firstNameControl]="taskDetails.get('team')"
+                                              [leaveDropdown]="teamArray"
+                                              [submitted]="submitted">
+                                            </app-basic-dropdown>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                            <app-basic-dropdown
+                                              [class]="[classValue.COL.LG_6, classValue.COL.XL_3]"
+                                              class="Select Name" [getClass]="true"
+                                              [placeholder]="'Select Name'"
+                                              [firstNameControl]="taskDetails.get('givenBy')"
+                                              [leaveDropdown]="givenByArray"
+                                              [submitted]="submitted">
+                                            </app-basic-dropdown>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                            <input id="pmEstimatedTime" 
+                                              type="text" class="form-control form-control-light"
+                                              formControlName="hours" placeholder="HH:MM" formatHM maxHours="999999"/>
+                                          </div>  
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                            <app-input-field appInputRestriction [class]="[classValue.COL.LG_6,classValue.COL.XL_3]"
+                                              [placeHolder]="'Link'" [formFieldLight]="true"
+                                              [firstNameControl]="taskDetails.get('link')" 
+                                              [submitted]="submitted">
+                                            </app-input-field>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="input_field">
+                                            <app-input-field appInputRestriction [class]="[classValue.COL.LG_6,classValue.COL.XL_3]"
+                                              [placeHolder]="'Type Info'" [formFieldLight]="true"
+                                              [firstNameControl]="taskDetails.get('info')" 
+                                              [submitted]="submitted">
+                                            </app-input-field>
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="button-container">
+                                            <div class="action_icon">
+                                              <ng-container *ngIf="taskDetailIndex==getNestedFormArrayControls('taskDetails', index).length-2">
+                                                <button class="edit_icon" title="Add More" (click)="addMoreTaskDetails(getFormArrayControls('estimateForm'), index)">
+                                                  <span class="icon"><i class="fa fa-plus"></i></span>
+                                                </button>
+                                              </ng-container>
+                                              <ng-container *ngIf="getRowSpan(getFormArrayControls('estimateForm'), index)>1 && getRowSpan(getFormArrayControls('estimateForm'), index)!=getNestedFormArrayControls('taskDetails', index).length-1">
+                                                <button class="minus-icon" title="Remove Task" (click)="removeTaskDetails(index,taskDetailIndex)">
+                                                  <span class="icon"><i class="fa fa-minus"></i></span>
+                                                </button>
+                                                <button class="save_icon" title="save Task" (click)="[setSaveIndexForCell(index,taskDetailIndex),onSubmitForm()]">
+                                                  <span class="icon">Save</span>
+                                                </button>
+                                            </ng-container>
+                                            </div>
+                                          </div>
+                                        </td>
+                                      </ng-container>
+                                    </tr>
+                                  </ng-container>
+                                </ng-container>
+                              </ng-container>  
+                            </tbody>
+                          </table>
+                          <div class="btn-container text-right mt-3">
+                            <button class="btn btn-md btn-add-more" (click)="addMoreTasks()">
+                              <i class="fas fa-plus"></i> Add More
+                            </button>
+                          </div>
+                          </form>  
+                          </div>
+                        </ng-container>
+                        <ng-template #chatPage>
+                          <div class="col-lg-12 new-project-detail d-flex justify-content-between align-items-start">
+                            <app-common-chat></app-common-chat>
+                          </div>
+                        </ng-template>
+                        </div>
+                  </div>
+
+              </div>
+              <div class="card border-0 project_card project_details">
+                <div class="card-body form-body">
+                  <h4>Track BidStatus</h4>
+                    <div class="col-lg-12 new-project-detail d-flex justify-content-between align-items-start">
+                          <div class="col-xl-2 col-lg-2 col-6" >
+                            <h6>Country</h6>
+                            <span>Country</span>
+                          </div>
+                        <div class="col-xl-2 col-lg-2 col-6" >
+                          <h6>Member Since</h6>
+                          <span>4.5</span>
+                        </div>
+                        <div class="col-xl-2 col-lg-2 col-6" >
+                          <h6>Total Spent($)</h6>
+                          <span>4LPA</span>
+                        </div>
+                      <div class="col-xl-2 col-lg-2 col-6" >
+                        <h6>No. of Jobs Posted</h6>
+                        <span>12</span>
+                      </div>
+                      <div class="col-xl-2 col-lg-2 col-6" >
+                        <h6>Hire Rate(%)</h6>
+                        <span>10%</span>
+                      </div>
+                        
+                      </div>
+
+                </div>
+            </div>
+              
+            </div>
+            
+        </div>
+    </div>
+</div>
